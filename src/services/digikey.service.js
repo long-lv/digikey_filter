@@ -93,7 +93,7 @@ class DigikeyService {
       where,
       offset,
       limit,
-      order: [['id', 'ASC']],
+      order: [['id', 'desc']],
     });
   }
 
@@ -102,7 +102,7 @@ class DigikeyService {
       where: {
         spnManufacturerPartNumber: { [Op.in]: partNumbers }
       },
-      order: [['id', 'ASC']],
+      order: [['id', 'desc']],
       raw: true,
     });
   }
