@@ -1,11 +1,16 @@
 <template>
     <div>
-        <a-table :columns="columns" :data-source="data" :row-selection="rowSelection"
-            :scroll="{ x: '1200px', y: 600 }" :loading="loadingApi" />
+        <a-table :columns="columns" :data-source="data" 
+            :row-selection="rowSelection"
+            :row-key="'spnManufacturerPartNumber'"
+            :scroll="{ x: '1200px', y: 600 }"
+            :loading="loadingApi" 
+            :pagination="{ pageSize: 20 }"
+        />
     </div>
 </template>
 <script>
-import { defineComponent, h, ref } from 'vue';
+import { defineComponent, h, ref, computed } from 'vue';
 export default defineComponent({
     name: 'TablePn',
     props: {
@@ -15,15 +20,24 @@ export default defineComponent({
         },
         loadingApi: {
             type: Boolean
+        },
+        selectedRows: {
+            type: Array,
+            default: () => []
         }
     },
-    setup() {
+    emits: [
+        "onRowSelect",
+        "onRowSelectAll"
+    ],
+    setup(props, context) {
         const columns = [
             {
-                title: 'ID',
-                dataIndex: 'id',
-                key: 'id',
-                width: '50px',
+                title: 'STT',
+                key: 'index',
+                width: '60px',
+                align: 'center',
+                customRender: ({ index }) => index + 1
             },
             {
                 title: 'Mouser PN',
@@ -52,7 +66,7 @@ export default defineComponent({
                 key: 'defaultImg',
                 width: '150px',
                 customRender: ({ text }) =>
-                h('img', { src: text, alt: 'img', style: 'width:40px; height:auto;' })
+                    h('img', { src: text, alt: 'img', style: 'width:40px; height:auto;' })
             },
             {
                 title: 'Datasheet',
@@ -180,19 +194,16 @@ export default defineComponent({
                 customRender: ({ text }) => text ?? '-'
             }
         ];
-
-        const rowSelection = ref({
-            checkStrictly: false,
+        
+        const rowSelection = computed(() => ({
+            selectedRow: props.selectedRows,
             onChange: (selectedRowKeys, selectedRows) => {
-                console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+                context.emit('onRowSelect', selectedRows);
             },
             onSelect: (record, selected, selectedRows) => {
-                console.log(record, selected, selectedRows);
+                context.emit('onRowSelect', selectedRows);
             },
-            onSelectAll: (selected, selectedRows, changeRows) => {
-                console.log(selected, selectedRows, changeRows);
-            },
-        });
+        }));
         return {
             columns,
             rowSelection,
