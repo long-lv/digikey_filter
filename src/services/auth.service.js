@@ -8,7 +8,6 @@ let cachedToken = null;
 let tokenExpiry = 0;
 
 class AuthService {
-  // Lấy access token, cache và tự động refresh khi sắp hết hạn
   static async getAccessToken() {
     const now = Date.now() / 1000;
     if (cachedToken && now < tokenExpiry - 60) {
@@ -30,7 +29,6 @@ class AuthService {
     return access_token;
   }
 
-  // Reset cache để bắt buộc fetch token mới
   static resetToken() {
     cachedToken = null;
     tokenExpiry = 0;

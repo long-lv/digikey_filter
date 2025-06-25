@@ -6,15 +6,9 @@ const { Op } = require('sequelize');
 const { Parser } = require('json2csv');
 const ExcelJS     = require('exceljs');
 
-// Endpoint Digikey expects body { keywords: [ ... ] }
 const SEARCH_URL = 'https://api.digikey.com/products/v4/search/keyword';
 
 class DigikeyService {
-  /**
-   * Lấy data một partNumber, tự động retry nếu token hết hạn (401)
-   * @param {string} partNumber
-   * @returns {Promise<Object|null>}
-   */
   static async fetchProduct(partNumber) {
     try {
       return await this._fetch(partNumber);
@@ -34,8 +28,8 @@ class DigikeyService {
     const resp = await axios.post(
       SEARCH_URL,
       {
-        Keywords: partNumber,   // chuỗi trực tiếp
-        RecordCount: 1          // bắt buộc nếu bạn muốn API trả về 1 bản ghi
+        Keywords: partNumber,   
+        RecordCount: 1         
       },
       {
         headers: {
@@ -107,12 +101,6 @@ class DigikeyService {
     });
   }
 
-  /**
-   * Chuyển mảng object thành CSV string
-   * @param {Object[]} data
-   * @param {string[]} fields      – danh sách keys cần xuất
-   * @returns {string}
-   */
   static toCSV(data, fields) {
     const parser = new Parser({ fields });
     return parser.parse(data);
@@ -124,21 +112,16 @@ class DigikeyService {
 
     if (!data.length) return workbook;
 
-    // Lấy tất cả keys
     const keys = Object.keys(data[0]);
 
-    // Gán width đặc biệt cho 'id' và width chung cho các cột còn lại
     sheet.columns = keys.map(key => {
         if (key === 'id') {
-        return { header: 'id', key, width: 10 };       // id chỉ rộng 10
+        return { header: 'id', key, width: 10 };
         }
-        return { header: key, key, width: 40 };          // các cột khác rộng 20
+        return { header: key, key, width: 40 };         
     });
 
-    // Đổ dữ liệu
     data.forEach(item => sheet.addRow(item));
-
-    // Nếu muốn auto–fit các cột khác (ngoại trừ id), bạn có thể lặp và recalcuate width ở đây:
     sheet.columns.forEach(column => {
         if (column.key !== 'id') {
         let maxLength = column.header.length;

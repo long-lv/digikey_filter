@@ -1,4 +1,3 @@
-// src/controllers/product.controller.js
 const { sequelize } = require("../db.js");
 const { Product } = require("../models/product.model.js");
 const DigikeyService = require("../services/digikey.service.js");
@@ -17,12 +16,10 @@ class ProductController {
 
       let results;
       if (parallel) {
-        // Chạy song song
         results = await Promise.all(
           partNumbers.map((pn) => DigikeyService.fetchProduct(pn))
         );
       } else {
-        // Chạy tuần tự, đảm bảo mỗi fetch xong mới next
         results = [];
         for (const pn of partNumbers) {
           const data = await DigikeyService.fetchProduct(pn);
@@ -30,7 +27,6 @@ class ProductController {
         }
       }
 
-      // Lọc bỏ null và lưu
       const toSave = results.filter((x) => x != null);
       if (toSave.length) {
         await Product.bulkCreate(toSave, {
@@ -113,7 +109,6 @@ class ProductController {
     }
 
     try {
-      // 1) Lấy data từ DB
       const products = await DigikeyService.fetchByManufacturerPNs(partNumbers);
       if (!products.length) {
         return res
@@ -123,10 +118,8 @@ class ProductController {
           });
       }
 
-      // 2) Xây Workbook
       const workbook = await DigikeyService.buildWorkbook(products);
 
-      // 3) Gửi file dưới dạng stream
       res.setHeader(
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
