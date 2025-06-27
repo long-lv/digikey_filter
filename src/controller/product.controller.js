@@ -43,9 +43,9 @@ class ProductController {
 
   static async listProducts(req, res) {
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 20) || 20;
+    const limit = parseInt(req.query.limit) || 20;
     const search = req.query.search;
-
+    const sortBy = req.query.sortBy
     try {
       await sequelize.sync();
 
@@ -53,6 +53,7 @@ class ProductController {
         page,
         limit,
         search,
+        sortBy
       });
       const totalPages = Math.ceil(count / limit);
 

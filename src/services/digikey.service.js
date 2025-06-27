@@ -75,7 +75,7 @@ class DigikeyService {
     };
   }
 
-  static async list({ page = 1, limit = 20, search }) {
+  static async list({ page = 1, limit = 20, search, sortBy='asc' }) {
     const offset = (page - 1) * limit;
     const where = {};
 
@@ -87,7 +87,7 @@ class DigikeyService {
       where,
       offset,
       limit,
-      order: [['id', 'desc']],
+      order: [['id', sortBy]],
     });
   }
 

@@ -1,16 +1,12 @@
 <template>
     <div>
-        <a-table :columns="columns" :data-source="data" 
-            :row-selection="rowSelection"
-            :row-key="'spnManufacturerPartNumber'"
-            :scroll="{ x: '1200px', y: 600 }"
-            :loading="loadingApi" 
-            :pagination="{ pageSize: 20 }"
-        />
+        <a-table :columns="columns" :data-source="data" :row-selection="rowSelection"
+            :row-key="'spnManufacturerPartNumber'" :scroll="{ x: '1200px', y: 600 }" :loading="loadingApi"
+            :pagination="tablePagination" @change="handleTableChange" />
     </div>
 </template>
 <script>
-import { defineComponent, h, ref, computed } from 'vue';
+import { defineComponent, h, computed } from 'vue';
 export default defineComponent({
     name: 'TablePn',
     props: {
@@ -24,11 +20,16 @@ export default defineComponent({
         selectedRows: {
             type: Array,
             default: () => []
+        },
+        pagination: {
+            type: Object,
+            default: () => { }
         }
     },
     emits: [
         "onRowSelect",
-        "onRowSelectAll"
+        "onRowSelectAll",
+        "pageChange"
     ],
     setup(props, context) {
         const columns = [
@@ -194,7 +195,23 @@ export default defineComponent({
                 customRender: ({ text }) => text ?? '-'
             }
         ];
-        
+
+        const tablePagination = computed(() => ({
+            current: props.pagination?.page || 1,
+            pageSize: props.pagination?.limit || 20,
+            total: props.pagination?.total || 0,
+            showSizeChanger: true,
+            pageSizeOptions: ['10', '20', '50', '100'],
+            showTotal: (total) => `Total ${total} items`,
+        }))
+
+        const handleTableChange = (pagination) => {
+            context.emit("pageChange", {
+                page: pagination.current,
+                limit: pagination.pageSize,
+            });
+        };
+
         const rowSelection = computed(() => ({
             selectedRow: props.selectedRows,
             onChange: (selectedRowKeys, selectedRows) => {
@@ -207,6 +224,8 @@ export default defineComponent({
         return {
             columns,
             rowSelection,
+            tablePagination,
+            handleTableChange,
         }
     }
 })

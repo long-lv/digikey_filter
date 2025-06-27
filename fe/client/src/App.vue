@@ -1,5 +1,5 @@
 <template>
-  <a-spin :spinning="loadingPage" size="large" tip="Loading..."  class="fullscreen-spin">
+  <a-spin :spinning="loadingPage" size="large" tip="Loading..." class="fullscreen-spin">
     <div class="wrap">
       <div class="container-input">
         <v-responsive class="mx-auto" max-width="500">
@@ -11,17 +11,25 @@
       </div>
       <div class="pn-list-wrap">
         <div class="list-item-wrap">
-          <a-tag v-for="(pn, id) in listPartNumber" color="geekblue" closable @close="onDeletePn(id)" :key="id">
+          <a-tag v-for="(pn, id) in listPartNumber" class="list-item" color="geekblue" closable @close="onDeletePn(id)"
+            :key="id">
             {{ pn }}
           </a-tag>
         </div>
       </div>
       <div class="btn-wrap">
         <a-button type="primary" @click="onExportExel" :disabled="!selectedRowKeys.length">Export Exel</a-button>
+        <div style="margin-left: 10px;">
+          <UpdateFile @on-up-load="handleUpdateFile"></UpdateFile>
+        </div>
+        <div>
+           <a-button type="primary" danger @click="getListPn({sortBy: 'asc'})" style="margin-left: 10px;">Sort by ASC</a-button>
+            <a-button danger @click="getListPn({sortBy: 'desc'})" style="margin-left: 10px;">Sort by DESC</a-button>
+        </div>
       </div>
       <div class="table-wrap">
         <TablePn :loading-api="loadingDataTable" :data="dataPnList" @on-row-select="onRowSelect"
-          :selected-rows="selectedRowKeys"></TablePn>
+          :pagination="pagination" :selected-rows="selectedRowKeys" @page-change="handlePageChange"></TablePn>
       </div>
     </div>
   </a-spin>
@@ -30,14 +38,16 @@
 import axios from 'axios';
 import { defineComponent, onMounted, ref } from 'vue';
 import { CloseOutlined } from '@ant-design/icons-vue'
-import TablePn from './components/tablePn.vue';
+import TablePn from './components/TablePn.vue';
 import { saveAs } from 'file-saver';
+import UpdateFile from './components/UpdateFile.vue';
 
 export default defineComponent({
   name: "App",
   props: {},
   components: {
     TablePn,
+    UpdateFile,
     CloseOutlined
   },
   setup() {
@@ -48,6 +58,13 @@ export default defineComponent({
     const loadingDataTable = ref(false);
     const dataPnList = ref();
     const selectedRowKeys = ref([])
+    const pagination = ref({
+      current: "",
+      pageSize: "",
+      total: "",
+      page: "",
+      showTotal: total => `Total ${total} items`,
+    })
     const clientUrl = import.meta.env.VITE_CLIENT_URL;
 
     const onHandleSearch = (val, event) => {
@@ -80,14 +97,17 @@ export default defineComponent({
       }
     }
 
-    const getListPn = async () => {
+    const getListPn = async ({page = "", limit = 20, sortBy='asc'} = {}) => {
       loadingDataTable.value = true
       loadingPage.value = true
       try {
-        const res = await axios.get(`${clientUrl}/api/products/list`);
+        const res = await axios.get(`${clientUrl}/api/products/list`, {
+          params: { page, limit, sortBy }
+        });
         if (res && res.status === 200) {
           if (res.data && res.data.data && res.data.data.length) {
             dataPnList.value = res.data.data;
+            pagination.value = { ...res.data.pagination }
           }
         }
       } catch (err) {
@@ -99,9 +119,13 @@ export default defineComponent({
     }
 
     const onInputPartNumber = () => {
-      listPartNumber.value.push(partNumber.value)
-      localStorage.setItem('savedPartNumbers', JSON.stringify(listPartNumber.value));
-      partNumber.value = ""
+      if (partNumber.value && partNumber.value.length > 0) {
+        listPartNumber.value.push(partNumber.value)
+        localStorage.setItem('savedPartNumbers', JSON.stringify(listPartNumber.value));
+        partNumber.value = ""
+      } else {
+        alert('nhập PN')
+      }
     }
 
     const onDeletePn = (id) => {
@@ -109,7 +133,9 @@ export default defineComponent({
     }
 
     const onRowSelect = (row) => {
-      selectedRowKeys.value = row.map(item => item.spnManufacturerPartNumber);
+      const selectedRow = row.map(item => item.spnManufacturerPartNumber);
+      selectedRowKeys.value.push(selectedRow);
+      console.log(selectedRowKeys.value, 'select row');
     }
 
     const onExportExel = async () => {
@@ -120,7 +146,7 @@ export default defineComponent({
           url: `${clientUrl}/api/products/export-xlsx`,
           method: 'POST',
           data: {
-            partNumbers: selectedRowKeys.value
+            partNumbers: selectedRowKeys.value.flat()
           },
           responseType: 'blob',
         });
@@ -140,9 +166,16 @@ export default defineComponent({
     const onExportCsv = () => {
 
     }
+
+    const handleUpdateFile = (listPN) => {
+      listPartNumber.value = [...listPN];
+    }
+
+    const handlePageChange = (pagination) => {
+      getListPn({page: pagination?.page, limit: pagination?.limit})
+    }
     onMounted(() => {
       const saved = localStorage.getItem('savedPartNumbers');
-      console.log(saved, 'saved');
       if (saved) {
         listPartNumber.value = JSON.parse(saved);
       }
@@ -156,13 +189,17 @@ export default defineComponent({
       selectedRowKeys,
       dataPnList,
       loadingDataTable,
+      pagination,
+      getListPn,
+      handlePageChange,
       onHandleSearch,
       onSearchPN,
       onInputPartNumber,
       onDeletePn,
       onRowSelect,
       onExportExel,
-      onExportCsv
+      onExportCsv,
+      handleUpdateFile
     }
   }
 })
@@ -183,20 +220,20 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   margin-top: 30px;
-  width: 100%;
+  min-width: 700px;
   flex-wrap: wrap;
 }
 
 .list-item-wrap {
   display: flex;
   justify-content: center;
-  width: 80%;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .list-item {
   margin-left: 10px;
   margin-bottom: 10px;
-  list-style: none;
   width: fit-content;
   background-color: bisque;
   border-radius: 4px;
@@ -204,6 +241,7 @@ export default defineComponent({
   padding: 5px 10px;
   color: #242424;
   position: relative;
+  font-weight: 500;
 }
 
 .table-wrap {
