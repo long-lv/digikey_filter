@@ -134,7 +134,16 @@ class DigikeyService {
     });
 
     return workbook;
-    }
+  }
+
+  static async deleteAllData() {
+    await sequelize.sync();
+
+    return Product.destroy({
+      where: {},
+      truncate: true,
+    });
+  }
 }
 
 module.exports = DigikeyService;

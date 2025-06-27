@@ -23,13 +23,6 @@ export default defineComponent({
             return false 
         }
 
-        const tablePagination = computed(() => ({
-            current: props.pagination?.page || 1,
-            pageSize: props.pagination?.limit || 20,
-            total: props.pagination?.total || 0,
-            showSizeChanger: false,
-            showTotal: (total) => `Total ${total} items`,
-        }))
 
         const readExcelFile = (file) => {
             const reader = new FileReader()
@@ -62,7 +55,6 @@ export default defineComponent({
 
         return {
             fileList,
-            tablePagination,
             beforeUpload
         }
     }

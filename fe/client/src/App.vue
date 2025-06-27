@@ -24,13 +24,15 @@
         </div>
         <div>
            <a-button type="primary" danger @click="getListPn({sortBy: 'asc'})" style="margin-left: 10px;">Sort by ASC</a-button>
-            <a-button danger @click="getListPn({sortBy: 'desc'})" style="margin-left: 10px;">Sort by DESC</a-button>
+           <a-button danger @click="getListPn({sortBy: 'desc'})" style="margin-left: 10px;">Sort by DESC</a-button>
+           <a-button warning @click="visibleDialogDelete = true" style="margin-left: 10px;">Delete All</a-button>
         </div>
       </div>
       <div class="table-wrap">
         <TablePn :loading-api="loadingDataTable" :data="dataPnList" @on-row-select="onRowSelect"
           :pagination="pagination" :selected-rows="selectedRowKeys" @page-change="handlePageChange"></TablePn>
       </div>
+      <DialogDeleteConfirm v-model:visible="visibleDialogDelete" @onSubmitDelete="handleSubmitDeleteAll" @onCancel="visibleDialogDelete = false"/>
     </div>
   </a-spin>
 </template>
@@ -41,6 +43,7 @@ import { CloseOutlined } from '@ant-design/icons-vue'
 import TablePn from './components/TablePn.vue';
 import { saveAs } from 'file-saver';
 import UpdateFile from './components/UpdateFile.vue';
+import DialogDeleteConfirm from './components/DialogDeleteConfirm.vue';
 
 export default defineComponent({
   name: "App",
@@ -48,6 +51,7 @@ export default defineComponent({
   components: {
     TablePn,
     UpdateFile,
+    DialogDeleteConfirm,
     CloseOutlined
   },
   setup() {
@@ -58,6 +62,7 @@ export default defineComponent({
     const loadingDataTable = ref(false);
     const dataPnList = ref();
     const selectedRowKeys = ref([])
+    const visibleDialogDelete = ref(false);
     const pagination = ref({
       current: "",
       pageSize: "",
@@ -174,6 +179,20 @@ export default defineComponent({
     const handlePageChange = (pagination) => {
       getListPn({page: pagination?.page, limit: pagination?.limit})
     }
+
+    const handleSubmitDeleteAll = async () => {
+      loadingPage.value = true
+      try{
+        await axios.delete(`${clientUrl}/api/products/delete-all`)
+        alert('Delete Ok')
+      } catch(err) {
+        console.error('Export Excel failed:', err);
+      } 
+      finally {
+        loadingPage.value = false
+      }
+    }
+
     onMounted(() => {
       const saved = localStorage.getItem('savedPartNumbers');
       if (saved) {
@@ -181,6 +200,7 @@ export default defineComponent({
       }
       getListPn();
     })
+
     return {
       loading,
       loadingPage,
@@ -190,6 +210,8 @@ export default defineComponent({
       dataPnList,
       loadingDataTable,
       pagination,
+      visibleDialogDelete,
+      handleSubmitDeleteAll,
       getListPn,
       handlePageChange,
       onHandleSearch,

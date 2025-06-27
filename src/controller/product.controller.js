@@ -137,6 +137,15 @@ class ProductController {
       return res.status(500).json({ error: "Lỗi server khi xuất Excel" });
     }
   }
+
+  static async deleteAllProduct(req,res) {
+    try { 
+      await DigikeyService.deleteAllData();
+      return res.json({ message: 'Đã xóa tất cả sản phẩm.' }); 
+    } catch(err) {
+      return res.status(500).json({ err: 'Lỗi server khi xóa sản phẩm' });
+    }
+  }
 }
 
 module.exports = ProductController;
