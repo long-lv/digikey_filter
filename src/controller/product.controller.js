@@ -143,6 +143,7 @@ class ProductController {
       await DigikeyService.deleteAllData();
       return res.json({ message: 'Đã xóa tất cả sản phẩm.' }); 
     } catch(err) {
+      console.log(err, 'err');
       return res.status(500).json({ err: 'Lỗi server khi xóa sản phẩm' });
     }
   }

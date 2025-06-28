@@ -185,6 +185,8 @@ export default defineComponent({
       try{
         await axios.delete(`${clientUrl}/api/products/delete-all`)
         alert('Delete Ok')
+        visibleDialogDelete.value = false
+        getListPn();
       } catch(err) {
         console.error('Export Excel failed:', err);
       } 

@@ -102,6 +102,78 @@ export default defineComponent({
                 // sorter: (a, b) => a.price1 - b.price1,
                 // customRender: ({ text }) => text != null ? text.toFixed(2) : '-'
             },
+             {
+                title: 'Packaging',
+                dataIndex: 'packaging',
+                key: 'packaging',
+                width: '100px'
+            },
+            {
+                title: 'Operating Temp Min',
+                dataIndex: 'operatingTemperatureMin',
+                key: 'operatingTemperatureMin',
+                width: '120px'
+            },
+            {
+                title: 'Operating Temp Max',
+                dataIndex: 'operatingTemperatureMax',
+                key: 'operatingTemperatureMax',
+                width: '120px'
+            },
+            {
+                title: 'Touch Panel',
+                dataIndex: 'touchPanel',
+                key: 'touchPanel',
+                width: '120px'
+            },
+            {
+                title: 'Module Size',
+                dataIndex: 'moduleSize',
+                key: 'moduleSize',
+                width: '120px'
+            },
+            {
+                title: 'IlluminationColor',
+                dataIndex: 'illuminationColor',
+                key: 'illuminationColor',
+                width: '120px'
+            },
+            {
+                title: 'Wave Length',
+                dataIndex: 'waveLength',
+                key: 'waveLength',
+                width: '120px'
+            },
+            {
+                title: 'If Forward Current',
+                dataIndex: 'ifForwardCurrent',
+                key: 'ifForwardCurrent',
+                width: '120px'
+            },
+            {
+                title: 'Vf Forward Voltage',
+                dataIndex: 'vfForwardVoltage',
+                key: 'vfForwardVoltage',
+                width: '120px'
+            },
+            {
+                title: 'Type',
+                dataIndex: 'type',
+                key: 'type',
+                width: '120px'
+            },
+            {
+                title: 'Qualification',
+                dataIndex: 'qualification',
+                key: 'qualification',
+                width: '120px'
+            },
+            {
+                title: 'Dimensions',
+                dataIndex: 'dimensions',
+                key: 'dimensions',
+                width: '120px'
+            },
             {
                 title: 'Description',
                 dataIndex: 'spnDescription',
@@ -116,22 +188,10 @@ export default defineComponent({
                 width: '80px'
             },
             {
-                title: 'Packaging',
-                dataIndex: 'packaging',
-                key: 'packaging',
-                width: '100px'
-            },
-            {
                 title: 'Status',
                 dataIndex: 'partStatus',
                 key: 'partStatus',
                 width: '100px'
-            },
-            {
-                title: 'Operating Temp.',
-                dataIndex: 'operatingTemperature',
-                key: 'operatingTemperature',
-                width: '120px'
             },
             {
                 title: 'Mount Type',
