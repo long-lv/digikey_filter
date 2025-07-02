@@ -3,11 +3,14 @@ const { sequelize } = require('../db.js');
 
 const Product = sequelize.define('Product', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+  partNumber: {type: DataTypes.STRING},
   spnMouserPartNumFormattedForProdInfo: { type: DataTypes.STRING },
   spnManufacturerPartNumber: { type: DataTypes.STRING },
   manufacturer: { type: DataTypes.STRING },
   defaultImg: { type: DataTypes.STRING },
-  price1: { type: DataTypes.FLOAT },
+  quantity: { type: DataTypes.INTEGER },
+  unitPrice: { type: DataTypes.FLOAT },
+  totalPrice: { type: DataTypes.FLOAT },
   datasheet: { type: DataTypes.STRING },
   product: { type: DataTypes.STRING },
   productClassification: { type: DataTypes.STRING },

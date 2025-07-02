@@ -50,14 +50,28 @@ class DigikeyService {
 
     const params = product.Parameters || [];
     const tempRange = parseTemperatureRange(params, "Operating Temperature");
-    console.log(product.Category?.FilterOptions, 'asdasdasd');
     return {
       spnMouserPartNumFormattedForProdInfo:
         product.ProductVariations?.[0]?.DigiKeyProductNumber || null,
+      partNumber: partNumber,
       spnManufacturerPartNumber: product.ManufacturerProductNumber,
       manufacturer: product.Manufacturer?.Name,
       defaultImg: product.PhotoUrl,
-      price1: product.UnitPrice,
+      quantity: (() => {
+        const firstVariation = product?.ProductVariations?.[0];
+        const firstPricing = firstVariation?.StandardPricing?.[0];
+        return firstPricing?.BreakQuantity ?? null;
+      })(),
+      unitPrice: (() => {
+        const firstVariation = product?.ProductVariations?.[0];
+        const firstPricing = firstVariation?.StandardPricing?.[0];
+        return firstPricing?.UnitPrice ?? null;
+      })(),
+      totalPrice: (() => {
+        const firstVariation = product?.ProductVariations?.[0];
+        const firstPricing = firstVariation?.StandardPricing?.[0];
+        return firstPricing?.TotalPrice ?? null;
+      })(),
       datasheet: product.DatasheetUrl,
       spnDescription: product.Description?.ProductDescription,
       product: product.Category?.Name || null,
@@ -66,9 +80,17 @@ class DigikeyService {
           .map((cat) => cat.Name)
           .join("; ") || null,
       series: product.Series?.Name,
-      packaging: (product.Category?.FilterOptions?.Packaging || [])
-          .map((pk) => pk.Value)
-          .join("; ") || null,
+      packaging: (() => {
+        const variations = product.ProductVariations || [];
+        const namesSet = new Set();
+
+        for (const variation of variations) {
+          const name = variation.PackageType?.Name;
+          if (name) namesSet.add(name);
+        }
+
+        return [...namesSet].join("; ") + (namesSet.size > 0 ? ";" : "");
+      })(),
       partStatus: product.ProductStatus?.Status,
       numberOfChannels: getParam(params, "Number of Channels"),
       interface: getParam(params, "Interface"),
@@ -128,13 +150,16 @@ class DigikeyService {
     return parser.parse(data);
   }
 
-  static async buildWorkbook(data) {
+  static async buildWorkbook(data, sortOrder = "asc") {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Products");
 
     if (!data.length) return workbook;
 
     const keys = Object.keys(data[0]);
+    const sortedData = [...data].sort((a, b) => {
+      return sortOrder === "asc" ? a.id - b.id : b.id - a.id;
+    });
 
     sheet.columns = keys.map((key) => {
       if (key === "id") {
@@ -142,8 +167,7 @@ class DigikeyService {
       }
       return { header: key, key, width: 40 };
     });
-
-    data.forEach((item) => sheet.addRow(item));
+    sortedData.forEach((item) => sheet.addRow(item));
     sheet.columns.forEach((column) => {
       if (column.key !== "id") {
         let maxLength = column.header.length;

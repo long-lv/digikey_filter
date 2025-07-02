@@ -6,7 +6,7 @@
     </div>
 </template>
 <script>
-import { defineComponent, h, computed } from 'vue';
+import { defineComponent, h, computed, render } from 'vue';
 export default defineComponent({
     name: 'TablePn',
     props: {
@@ -41,11 +41,17 @@ export default defineComponent({
                 customRender: ({ index }) => index + 1
             },
             {
-                title: 'Mouser PN',
-                dataIndex: 'spnMouserPartNumFormattedForProdInfo',
-                key: 'spnMouserPartNumFormattedForProdInfo',
+                title: 'Id',
+                dataIndex: 'id',
+                key: 'id',
+                width: '60px',
+                align: 'center',
+            },
+            {
+                title: 'Part Number',
+                dataIndex: 'partNumber',
+                key: 'partNumber',
                 width: '200px',
-                ellipsis: true
             },
             {
                 title: 'Mfr Part Number',
@@ -94,19 +100,52 @@ export default defineComponent({
                 ellipsis: true
             },
             {
-                title: 'Price (USD)',
-                dataIndex: 'price1',
-                key: 'price1',
+                title: 'Quantity',
+                dataIndex: 'quantity',
+                key: 'quantity',
                 width: '150px',
                 align: 'right',
                 // sorter: (a, b) => a.price1 - b.price1,
                 // customRender: ({ text }) => text != null ? text.toFixed(2) : '-'
             },
-             {
+            {
+                title: 'Unit Price (USD)',
+                dataIndex: 'unitPrice',
+                key: 'unitPrice',
+                width: '150px',
+                align: 'right',
+                // sorter: (a, b) => a.price1 - b.price1,
+                // customRender: ({ text }) => text != null ? text.toFixed(2) : '-'
+            },
+            {
+                title: 'Total Price (USD)',
+                dataIndex: 'totalPrice',
+                key: 'totalPrice',
+                width: '150px',
+                align: 'right',
+                // sorter: (a, b) => a.price1 - b.price1,
+                // customRender: ({ text }) => text != null ? text.toFixed(2) : '-'
+            },
+            {
                 title: 'Packaging',
                 dataIndex: 'packaging',
                 key: 'packaging',
-                width: '100px'
+                width: '200px',
+                customRender: ({ text }) => {
+                    if (!text) return '';
+                    return {
+                        children: h(
+                            'span',
+                            {
+                                innerHTML: text
+                                    .split(';')
+                                    .filter((item) => item.trim() !== '')
+                                    .map((item) => item.trim())
+                                    .join('<br/>')
+                            }
+                        )
+                    };
+                }
             },
             {
                 title: 'Operating Temp Min',

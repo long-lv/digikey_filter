@@ -102,7 +102,7 @@ class ProductController {
   }
 
   static async exportExcel(req, res) {
-    const { partNumbers = [] } = req.body;
+    const { partNumbers = [], sortBy= 'desc' } = req.body;
     if (!Array.isArray(partNumbers) || partNumbers.length === 0) {
       return res
         .status(400)
@@ -119,7 +119,7 @@ class ProductController {
           });
       }
 
-      const workbook = await DigikeyService.buildWorkbook(products);
+      const workbook = await DigikeyService.buildWorkbook(products, sortBy);
 
       res.setHeader(
         "Content-Type",

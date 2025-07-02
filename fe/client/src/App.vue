@@ -23,8 +23,8 @@
           <UpdateFile @on-up-load="handleUpdateFile"></UpdateFile>
         </div>
         <div>
-           <a-button type="primary" danger @click="getListPn({sortBy: 'asc'})" style="margin-left: 10px;">Sort by ASC</a-button>
-           <a-button danger @click="getListPn({sortBy: 'desc'})" style="margin-left: 10px;">Sort by DESC</a-button>
+           <a-button type="primary" danger @click="sortByAsc" :disabled="sortBy === 'asc'" style="margin-left: 10px;">Sort by ASC</a-button>
+           <a-button danger @click="sortByDesc" :disabled="sortBy === 'desc'" style="margin-left: 10px;">Sort by DESC</a-button>
            <a-button warning @click="visibleDialogDelete = true" style="margin-left: 10px;">Delete All</a-button>
         </div>
       </div>
@@ -63,6 +63,7 @@ export default defineComponent({
     const dataPnList = ref();
     const selectedRowKeys = ref([])
     const visibleDialogDelete = ref(false);
+    const sortBy = ref("asc");
     const pagination = ref({
       current: "",
       pageSize: "",
@@ -151,7 +152,8 @@ export default defineComponent({
           url: `${clientUrl}/api/products/export-xlsx`,
           method: 'POST',
           data: {
-            partNumbers: selectedRowKeys.value.flat()
+            partNumbers: selectedRowKeys.value.flat(),
+            sortBy: sortBy.value || 'desc'
           },
           responseType: 'blob',
         });
@@ -184,9 +186,9 @@ export default defineComponent({
       loadingPage.value = true
       try{
         await axios.delete(`${clientUrl}/api/products/delete-all`)
+        dataPnList.value = [];
         alert('Delete Ok')
         visibleDialogDelete.value = false
-        getListPn();
       } catch(err) {
         console.error('Export Excel failed:', err);
       } 
@@ -194,6 +196,16 @@ export default defineComponent({
         loadingPage.value = false
       }
     }
+
+    const sortByAsc = () => {
+      sortBy.value = 'asc';
+      getListPn({ sortBy: 'asc' });
+    };
+
+    const sortByDesc = () => {
+      sortBy.value = 'desc';
+      getListPn({ sortBy: 'desc' });
+    };
 
     onMounted(() => {
       const saved = localStorage.getItem('savedPartNumbers');
@@ -213,6 +225,9 @@ export default defineComponent({
       loadingDataTable,
       pagination,
       visibleDialogDelete,
+      sortBy,
+      sortByDesc,
+      sortByAsc,
       handleSubmitDeleteAll,
       getListPn,
       handlePageChange,
